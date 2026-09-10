@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <script>document.documentElement.classList.add("js");</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vectis Rates Terminal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <canvas id="bg-canvas" class="cx-bg-canvas" aria-hidden="true"></canvas>
+  <div class="cx-orb cx-orb--a" aria-hidden="true"></div>
+  <div class="cx-orb cx-orb--b" aria-hidden="true"></div>
+  <div id="cursor-glow" class="cx-cursor-glow" aria-hidden="true"></div>
+
+  <header class="cx-header">
+    <div class="cx-header__inner">
+      <div class="cx-header__brand">
+        <span class="cx-header__glyph"></span>
+        <span class="cx-header__name">Vectis Rates</span>
+        <span class="cx-header__desk">RATES &amp; MACRO QUANT DESK</span>
+      </div>
+      <nav class="cx-header__nav">
+        <a href="#workspace">Workspace</a>
+        <a href="#indicadores">Indicadores</a>
+      </nav>
+      <div class="cx-header__status">
+        <span class="cx-live"><i class="cx-live__dot"></i>API B3 · BCB CONECTADAS</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="cx-shell">
+    <section class="cx-hero">
+      <div class="cx-hero__blob" aria-hidden="true"></div>
+      <div id="bull-figure" class="cx-bull" aria-hidden="true">
+        <div class="cx-bull__glow"></div>
+        <img src="/static/img/bull.png" alt="" class="cx-bull__img" loading="lazy">
+      </div>
+
+      <div class="cx-hero__copy" data-reveal>
+        <span class="cx-badge cx-mono">DI FUTURO B3 · SELIC · FOCUS BCB</span>
+        <h1 class="cx-hero__title">Estrutura a Termo da Taxa de Juros, ao vivo</h1>
+        <p class="cx-hero__subtitle">Curva de DI futuro ajustada por spline cúbica monotônica sobre o fechamento real da B3, decomposta contra a trajetória de Selic do Relatório Focus (BCB) para estimar o prêmio de risco no vértice longo.</p>
+      </div>
+    </section>
+
+    <section id="workspace" class="cx-workspace" data-reveal>
+      <div class="cx-workspace__head">
+        <div>
+          <div class="cx-workspace__title">Estrutura a Termo da Taxa de Juros</div>
+          <div class="cx-workspace__meta cx-mono" id="chart-meta">CURVA DI FUTURO B3 · BASE 252 · FECHAMENTO —</div>
+        </div>
+        <div class="cx-workspace__headright">
+          <button type="button" id="reset-date-btn" class="cx-chip cx-reset-date" hidden>Voltar ao mais recente ×</button>
+          <span class="cx-live cx-live--tight" id="live-status"><i class="cx-live__dot"></i>TEMPO REAL</span>
+        </div>
+      </div>
+
+      <div class="cx-command">
+        <div class="cx-command__field">
+          <label class="cx-command__label" for="search-input">Consulta livre</label>
+          <input
+            id="search-input"
+            class="cx-input cx-mono"
+            type="text"
+            autocomplete="off"
+            placeholder="Vértice, série SGS ou data — ex.: DI1F29, SGS 432, 09/09/2026"
+          >
+        </div>
+        <button id="search-button" class="cx-btn cx-btn--secondary" type="button">Consultar</button>
+      </div>
+      <div id="search-results" class="cx-command__results" hidden></div>
+
+      <div class="cx-metarow">
+        <div class="cx-metacol">
+          <div class="cx-metacol__label cx-mono">VÉRTICES DI1</div>
+          <div class="cx-chips" id="vertex-chips"></div>
+        </div>
+        <div class="cx-metacol">
+          <div class="cx-metacol__label cx-mono">VÉRTICES PADRONIZADOS</div>
+          <div class="cx-chips" id="standard-chips"></div>
+        </div>
+      </div>
+
+      <div class="cx-chart-wrap">
+        <svg id="ettj-chart" viewBox="0 0 960 380" preserveAspectRatio="none" role="img" aria-label="Gráfico da curva ETTJ"></svg>
+        <div class="cx-chart-empty" id="chart-empty" hidden>
+          <span class="cx-mono">Sem dados de curva disponíveis no momento.</span>
+        </div>
+        <div class="cx-tooltip" id="chart-tooltip" hidden></div>
+        <div class="cx-chart-loading" id="chart-loading" hidden>
+          <span class="cx-spinner" aria-hidden="true"></span>
+          <span class="cx-mono">Atualizando curva…</span>
+        </div>
+      </div>
+
+      <div id="contract-ficha" class="cx-ficha" hidden></div>
+
+      <div class="cx-legend">
+        <span class="cx-legend__item"><i class="cx-legend__dot cx-legend__dot--line"></i>curva interpolada</span>
+        <span class="cx-legend__item"><i class="cx-legend__dot cx-legend__dot--point"></i>vértice líquido (DI1)</span>
+        <span class="cx-legend__premium cx-mono" id="legend-premium">Prêmio no vértice longo: —</span>
+      </div>
+
+      <div class="cx-subgrid">
+        <div class="cx-subpanel">
+          <div class="cx-subpanel__title cx-mono">VÉRTICES PADRONIZADOS</div>
+          <table class="cx-table cx-mono" id="table-standard">
+            <thead><tr><th>Vértice</th><th>Data</th><th>DU</th><th>Taxa</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="cx-subpanel">
+          <div class="cx-subpanel__title cx-mono">FORWARDS DISCRETOS</div>
+          <table class="cx-table cx-mono" id="table-forwards">
+            <thead><tr><th>Termo</th><th>Início</th><th>Fim</th><th>Fwd</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="indicadores" class="cx-indicators" data-reveal>
+      <div class="cx-indicators__head">
+        <h2>Indicadores e Métricas de Risco</h2>
+        <span class="cx-mono cx-indicators__meta" id="indicators-meta">ÚLTIMA APURAÇÃO —</span>
+      </div>
+      <div class="cx-kpis" id="kpi-grid">
+        <article class="cx-metric cx-metric--skeleton"></article>
+        <article class="cx-metric cx-metric--skeleton"></article>
+        <article class="cx-metric cx-metric--skeleton"></article>
+        <article class="cx-metric cx-metric--skeleton"></article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="cx-footer">
+    <span>Dados: B3 (boletim de derivativos) · BCB (SGS / Focus). Motor: <code class="cx-mono">vectis.quant</code>.</span>
+  </footer>
+
+  <script src="/static/js/effects.js" defer></script>
+  <script src="/static/js/app.js" defer></script>
+</body>
+</html>
