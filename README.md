@@ -19,9 +19,9 @@ O **Vectis Rates Terminal** elimina essa barreira consumindo dados oficiais diá
   - **Calendário Nacional & ANBIMA:** Tratamento de feriados fixos e móveis nacionais (convenção dias úteis / 252).
 
 - **Motor Quantitativo (`vectis.quant`):**
-  - **Spline Cúbica Monotônica (PCHIP / Fritsch-Carlson):** Interpolação matemática da curva zero discreta, garantindo suavidade e impedindo *overshoots* ou oscilações artificiais nas taxas futuras.
+  - **Spline Cúbica Monotônica (PCHIP / Fritsch-Carlson):** Interpolação matemática da curva zero discreta, garantindo suavidade e impedindo overshoots ou oscilações artificiais nas taxas futuras.
   - **Taxas Forward:** Extração contínua da taxa instantânea e cálculo de forwards discretos padrão de mesa (1Ax1A, 2Ax1A, 2Ax3A, 5Ax5A).
-  - **Decomposição do Prêmio de Risco:** Comparação entre a taxa spot negociada na B3 no vértice longo e a taxa acumulada esperada pelo Relatório Focus, apurando o prêmio de risco exigido em *basis points* (bps).
+  - **Decomposição do Prêmio de Risco:** Comparação entre a taxa spot negociada na B3 no vértice longo e a taxa acumulada esperada pelo Relatório Focus, apurando o prêmio de risco exigido em basis points (bps).
 
 - **Interface Visual de Mesa Institucional:**
   - Identidade visual dark mode de alta precisão com acabamento em neon e partículas dinâmicas em canvas.
@@ -44,3 +44,35 @@ vectis-rates-terminal/
 │   ├── validate_data_feed.py  # Script de validação da camada de dados BCB
 │   └── validate_ettj_engine.py# Validação e teste do motor quantitativo
 └── requirements.txt
+```
+
+---
+
+### 🚀 Como Executar Localmente
+
+1. **Clone o repositório:**
+```bash
+git clone [https://github.com/MatheusFolster/vectis-rates-terminal.git](https://github.com/MatheusFolster/vectis-rates-terminal.git)
+cd vectis-rates-terminal
+```
+
+2. **Instale as dependências:**
+```bash
+pip install -r requirements.txt
+```
+
+3. **Inicie o terminal:**
+```bash
+python scripts/run_terminal.py
+```
+A estação de trabalho abrirá automaticamente no navegador em `http://127.0.0.1:8000`.
+
+---
+
+### 🧭 Roadmap
+- [x] Ingestão oficial B3 e BCB (SGS / Focus)
+- [x] Motor de interpolação PCHIP e métricas de curva (DU/252)
+- [x] Interface interativa em SVG e navegação histórica
+- [ ] **Módulo Breakeven Inflation:** Curva real de NTN-B e projeção de inflação implícita
+- [ ] Simulador de estresse e choques na curva de juros
+- [ ] Hospedagem e deploy público em nuvem
